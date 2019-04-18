@@ -17,14 +17,14 @@ struct laser_data {
 	int nrays;
 	double  min_theta;
 	double  max_theta;
-	
+
 	double * restrict theta;
-	
+
 	int    * restrict valid;
 	double * restrict readings;
-	
+
 	int    * restrict cluster;
-	
+
 	double * restrict alpha;
 	double * restrict cov_alpha;
 	int    * restrict alpha_valid;
@@ -32,17 +32,17 @@ struct laser_data {
 	double * restrict readings_sigma;
 
 	double * restrict true_alpha;
-	
+
 	struct correspondence*  restrict corr;
 
-	double true_pose[3];		
-	double odometry[3];	
-	double estimate[3];	
-	
+	double true_pose[3];
+	double odometry[3];
+	double estimate[3];
+
 
 	/** Cartesian representation */
 	point2d *  restrict points;
-	/** Cartesian representation, in "world" (laser_ref) coordinates. 
+	/** Cartesian representation, in "world" (laser_ref) coordinates.
 	    Computed using ld_compute_world_coords() */
 	point2d *  restrict points_w;
 
@@ -52,15 +52,15 @@ struct laser_data {
 
 
 	/* Jump tables needed by find_correspondences_tricks(). */
-	int * restrict up_bigger, 
-	    * restrict up_smaller, 
-	    * restrict down_bigger, 
-	    * restrict down_smaller;	
+	int * restrict up_bigger,
+	    * restrict up_smaller,
+	    * restrict down_bigger,
+	    * restrict down_smaller;
 };
 
 struct correspondence {
 	/** 1 if this correspondence is valid  */
-	int valid; 
+	int valid;
 	/** Closest point in the other scan.  */
 	int j1;
 	/** Second closest point in the other scan.  */
@@ -68,7 +68,7 @@ struct correspondence {
 	/** Type of correspondence (point to point, or point to line) */
 	enum { corr_pp = 0, corr_pl = 1} type;
 	/** Squared distance from p(i) to point j1 */
-	double dist2_j1; 
+	double dist2_j1;
 };
 
 typedef struct laser_data* LDP;
@@ -112,22 +112,22 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma);
 
 
 
-/** 
+/**
 	Tries to read a laser scan from file. If error or EOF, it returns 0.
-	Whitespace is skipped. If first valid char is '{', it tries to read 
+	Whitespace is skipped. If first valid char is '{', it tries to read
 	it as JSON. If next char is 'F' (first character of "FLASER"),
-	it tries to read in Carmen format. Else, 0 is returned. 
+	it tries to read in Carmen format. Else, 0 is returned.
 */
 LDP ld_read_smart(FILE*);
 
-/** 
+/**
 	Tries to read a laser scan from a string.
 */
 LDP ld_read_smart_string(const char*);
 
 
-/** Read next FLASER line in file (initializes ld). 
-	Returns 0 on failure. If the file is EOF, it returns 1 
+/** Read next FLASER line in file (initializes ld).
+	Returns 0 on failure. If the file is EOF, it returns 1
 	and sets ld to 0.
 	You probably want to use the ld_read_smart() function. */
 int ld_read_next_laser_carmen(FILE*, LDP*ld);
@@ -149,11 +149,10 @@ void ld_write_format(LDP ld, FILE*stream, const char * out_format);
 
 
 void possible_interval(
-	const double *p_i_w, LDP laser_sens, 
+	const double *p_i_w, LDP laser_sens,
 	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);
 
 
 #include "laser_data_inline.h"
 
 #endif
-

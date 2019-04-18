@@ -1,11 +1,10 @@
 PROJECT (CSM C CXX)
 
-
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 3.4)
 set(csm_link_flags "-L.")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
@@ -18,15 +17,15 @@ IF(GSL_FOUND)
 	MESSAGE(STATUS "   CMAKE_GSL_CXX_FLAGS = ${CMAKE_GSL_CXX_FLAGS}")
 	MESSAGE(STATUS "   GSL_LINK_DIRECTORIES = '${GSL_LINK_DIRECTORIES}'")
 
- 	
+
 	set(csm_c_flags "${csm_c_flags} -I${GSL_INCLUDE_DIR}")
-	if(GSL_LINK_DIRECTORIES)	
+	if(GSL_LINK_DIRECTORIES)
 #		set(csm_link_flags "${csm_link_flags}
 		set(csm_link_flags "${csm_link_flags} -L${GSL_LINK_DIRECTORIES}")
-	endif(GSL_LINK_DIRECTORIES)	
+	endif(GSL_LINK_DIRECTORIES)
 
 	set(csm_link_flags "${csm_link_flags} ${GSL_LIBRARIES}")
-	
+
 ELSE(GSL_FOUND)
 	MESSAGE(FATAL_ERROR "GSL not found.")
 ENDIF(GSL_FOUND)
@@ -38,10 +37,10 @@ IF(CAIRO_FOUND)
 	MESSAGE(STATUS "   CAIRO_CFLAGS = ${CAIRO_CFLAGS}")
 	MESSAGE(STATUS "   CAIRO_LIBRARY = ${CAIRO_LIBRARY}")
 	MESSAGE(STATUS "   CAIRO_INCLUDE_DIR = ${CAIRO_INCLUDE_DIR}")
-	
+
 	set(csm_link_flags "${csm_link_flags} ${CAIRO_LIBRARY}")
 	SET(csm_c_flags "${csm_c_flags} ${CAIRO_CFLAGS} -I${CAIRO_INCLUDE_DIR}")
-	
+
 ELSE(CAIRO_FOUND)
 	MESSAGE(WARNING "* Cairo not found: plotting programs (e.g., 'log2pdf') will not be built.")
 	MESSAGE(WARNING "* install Cairo from http://cairographics.org ")
@@ -65,7 +64,7 @@ IF("${CMAKE_SYSTEM}" MATCHES "Linux")
 	ADD_DEFINITIONS(-DLINUX)
 ENDIF("${CMAKE_SYSTEM}" MATCHES "Linux")
 
-########### Options ########## 
+########### Options ##########
 
 SUBDIRS(lib/options)
 SUBDIRS(lib/json-c)
@@ -77,7 +76,7 @@ SUBDIRS(csm)
 
 
 
-########### SM applications ########## 
+########### SM applications ##########
 
 MACRO(new_executable exec)
 	ADD_EXECUTABLE(${exec} apps/${exec}.c)
@@ -136,7 +135,7 @@ ENABLE_TESTING()
 ADD_TEST(test_math_utils_sanity test_math_utils_sanity)
 
 
-SET(csm_sources 
+SET(csm_sources
 ./csm/clustering.c
 ./csm/gpm/gpm.c
 ./csm/icp/icp.c
@@ -146,10 +145,10 @@ SET(csm_sources
 ./csm/icp/icp_loop.c
 ./csm/icp/icp_outliers.c
 ./csm/icp/icp_debug.c
-./csm/mbicp/mbicp_interface.c      
-./csm/mbicp/MbICP.c      
-./csm/mbicp/calcul.c     
-./csm/mbicp/percolate.c  
+./csm/mbicp/mbicp_interface.c
+./csm/mbicp/MbICP.c
+./csm/mbicp/calcul.c
+./csm/mbicp/percolate.c
 ./csm/mbicp/sp_matrix.c
 ./csm/hsm/hsm.c
 ./csm/hsm/hsm_interface.c
@@ -226,15 +225,15 @@ foreach(header ${csm_headers} ${lib_headers})
 	GET_FILENAME_COMPONENT(header_dir ${header} PATH)
 
 #	MESSAGE("Ciao ${header_base} ${header_dir}")
-	
-	CONFIGURE_FILE(header_test.c.in ${header_dir}/${header_base}_header_test.cpp @ONLY)	
+
+	CONFIGURE_FILE(header_test.c.in ${header_dir}/${header_base}_header_test.cpp @ONLY)
 	ADD_EXECUTABLE(${header_base}_header_test ${header_dir}/${header_base}_header_test.cpp)
 	SET_TARGET_PROPERTIES(${header_base}_header_test  PROPERTIES LINKER_LANGUAGE CXX)
 	TARGET_LINK_LIBRARIES(${header_base}_header_test  csm-static ${csm_link_flags})
 
-	CONFIGURE_FILE(header_test.c.in ${header_dir}/${header_base}_header_test2.c @ONLY)	
+	CONFIGURE_FILE(header_test.c.in ${header_dir}/${header_base}_header_test2.c @ONLY)
 	ADD_EXECUTABLE(${header_base}_header_test2 ${header_dir}/${header_base}_header_test2.c)
 	TARGET_LINK_LIBRARIES(${header_base}_header_test2  csm-static ${csm_link_flags})
-	
+
 endforeach(header ${csm_headers} ${lib_headers})
 endif(0)

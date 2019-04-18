@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 2.4)
-cmake_policy(SET CMP0004 OLD)
+cmake_minimum_required(VERSION 3.4)
 SET(local_prefix "local_config/local-")
 FIND_PROGRAM(HOSTNAME hostname PATHS $ENV{PATH})
 IF(HOSTNAME)
@@ -9,16 +8,16 @@ IF(HOSTNAME)
 	ELSE(CYGWIN OR WIN32)
 		SET(hostname_params "-s")
 	ENDIF(CYGWIN OR WIN32)
-	
+
 	EXEC_PROGRAM(${HOSTNAME} ARGS ${hostname_params} OUTPUT_VARIABLE host)
 
 	SET(local "${local_prefix}${host}.cmake")
-	
+
 	SET(extension "$ENV{CSM_CONF}")
 	IF(extension)
 		SET(local "${local_prefix}${host}-${extension}.cmake")
 	ENDIF(extension)
-	
+
 	IF(EXISTS ${local})
 		MESSAGE(STATUS "Including local configuration ${local}.")
 		INCLUDE(${local})
@@ -29,6 +28,5 @@ ELSE(HOSTNAME)
 	MESSAGE(STATUS "Program `hostname` not found. (don't worry)")
 ENDIF(HOSTNAME)
 
-
-ENABLE_TESTING()
-SUBDIRS(sm)
+enable_testing()
+add_subdirectory(sm)

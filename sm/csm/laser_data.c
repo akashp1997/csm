@@ -33,28 +33,28 @@ int* alloc_int_array(int n, int def) {
 
 void ld_alloc(LDP ld, int nrays) {
 	ld->nrays = nrays;
-	
+
 	ld->valid        = alloc_int_array(nrays, 0);
 	ld->readings     = alloc_double_array(nrays, GSL_NAN);
 	ld->readings_sigma = alloc_double_array(nrays, GSL_NAN);
 	ld->theta        = alloc_double_array(nrays, GSL_NAN);
-	
+
 	ld->min_theta = GSL_NAN;
 	ld->max_theta = GSL_NAN;
-	
+
 	ld->cluster      = alloc_int_array(nrays, -1);
 	ld->alpha        = alloc_double_array(nrays, GSL_NAN);
 	ld->cov_alpha    = alloc_double_array(nrays, GSL_NAN);
 	ld->alpha_valid  = alloc_int_array(nrays, 0);
 
 	ld->true_alpha   = alloc_double_array(nrays, GSL_NAN);
-	
+
 	ld->up_bigger    = alloc_int_array(nrays, 0);
 	ld->up_smaller   = alloc_int_array(nrays, 0);
 	ld->down_bigger  = alloc_int_array(nrays, 0);
 	ld->down_smaller = alloc_int_array(nrays, 0);
 
-	ld->corr = (struct correspondence*) 
+	ld->corr = (struct correspondence*)
 		malloc(sizeof(struct correspondence)*nrays);
 
 	int i;
@@ -63,24 +63,24 @@ void ld_alloc(LDP ld, int nrays) {
 		ld->corr[i].j1 = -1;
 		ld->corr[i].j2 = -1;
 	}
-	
+
 	for(i=0;i<3;i++) {
-		ld->odometry[i] = 
-		ld->estimate[i] = 
+		ld->odometry[i] =
+		ld->estimate[i] =
 		ld->true_pose[i] = GSL_NAN;
 	}
-	
+
 	ld->points = (point2d*) malloc(nrays * sizeof(point2d));
 	ld->points_w = (point2d*) malloc(nrays * sizeof(point2d));
-	
+
 	for(i=0;i<nrays;i++) {
-		ld->points[i].p[0] = 
-		ld->points[i].p[1] = 
-		ld->points[i].rho = 
+		ld->points[i].p[0] =
+		ld->points[i].p[1] =
+		ld->points[i].rho =
 		ld->points[i].phi = GSL_NAN;
 		ld->points_w[i] = ld->points[i];
 	}
-	
+
 	strcpy(ld->hostname, "CSM");
 }
 
@@ -89,7 +89,7 @@ void ld_free(LDP ld) {
 	free(ld);
 }
 
-void ld_dealloc(struct laser_data*ld){	
+void ld_dealloc(struct laser_data*ld){
 	free(ld->valid);
 	free(ld->readings);
 	free(ld->readings_sigma);
@@ -104,7 +104,7 @@ void ld_dealloc(struct laser_data*ld){
 	free(ld->down_bigger);
 	free(ld->down_smaller);
 	free(ld->corr);
-	
+
 /*	int i;
 	for(i=0;i<ld->nrays;i++)
 		gsl_vector_free(ld->p[i]);
@@ -121,8 +121,8 @@ void ld_compute_cartesian(LDP ld) {
 /*		if(!ld_valid_ray(ld,i)) continue;*/
 		double x = cos(ld->theta[i])*ld->readings[i];
 		double y = sin(ld->theta[i])*ld->readings[i];
-		
-		ld->points[i].p[0] = x, 
+
+		ld->points[i].p[0] = x,
 		ld->points[i].p[1] = y;
 		ld->points[i].rho = GSL_NAN;
 		ld->points[i].phi = GSL_NAN;
@@ -134,7 +134,7 @@ void ld_compute_world_coords(LDP ld, const double *pose) {
 	double pose_x = pose[0];
 	double pose_y = pose[1];
 	double pose_theta = pose[2];
-	double cos_theta = cos(pose_theta); 
+	double cos_theta = cos(pose_theta);
 	double sin_theta = sin(pose_theta);
 	const int nrays = ld->nrays ;
 
@@ -142,31 +142,29 @@ void ld_compute_world_coords(LDP ld, const double *pose) {
 	point2d * points_w = ld->points_w;
 	int i; for(i=0;i<nrays;i++) {
 		if(!ld_valid_ray(ld,i)) continue;
-		double x0 = points[i].p[0], 
-		       y0 = points[i].p[1]; 
-		
+		double x0 = points[i].p[0],
+		       y0 = points[i].p[1];
+
 		if(is_nan(x0) || is_nan(y0)) {
 			sm_error("ld_compute_world_coords(): I expected that cartesian coords were already computed: ray #%d: %f %f.\n", i, x0, y0);
 		}
-		
+
 		points_w[i].p[0] = cos_theta * x0 -sin_theta*y0 + pose_x;
 		points_w[i].p[1] = sin_theta * x0 +cos_theta*y0 + pose_y;
 		/* polar coordinates */
 	}
-	
+
 	for(i=0;i<nrays;i++) {
 		double x = points_w[i].p[0];
 		double y = points_w[i].p[1];
 		points_w[i].rho = sqrt( x*x+y*y);
 		points_w[i].phi = atan2(y, x);
 	}
-	
+
 }
 
-
-
 int ld_num_valid_correspondences(LDP ld) {
-	int i; 
+	int i;
 	int num = 0;
 	for(i=0;i<ld->nrays;i++) {
 		if(ld->corr[i].valid)
@@ -178,10 +176,10 @@ int ld_num_valid_correspondences(LDP ld) {
 
 int ld_valid_fields(LDP ld)  {
 	if(!ld) {
-		sm_error("NULL pointer given as laser_data*.\n");	
+		sm_error("NULL pointer given as laser_data*.\n");
 		return 0;
 	}
-	
+
 	int min_nrays = 10;
 	int max_nrays = 10000;
 	if(ld->nrays < min_nrays || ld->nrays > max_nrays) {
@@ -193,7 +191,7 @@ int ld_valid_fields(LDP ld)  {
 			ld->min_theta, ld->max_theta);
 		return 0;
 	}
-	double min_fov = deg2rad(20.0); 
+	double min_fov = deg2rad(20.0);
 	double max_fov = 2.01 * M_PI;
 	double fov = ld->max_theta - ld->min_theta;
 	if( fov < min_fov || fov > max_fov) {
@@ -226,7 +224,7 @@ int ld_valid_fields(LDP ld)  {
 				sm_error("Ray #%d: %f is not in interval (%f, %f) \n",
 					i, r, min_reading, max_reading);
 				return 0;
-			}		
+			}
 		} else {
 			/* ray not valid, but checking theta anyway */
 			if(is_nan(th)) {
@@ -244,12 +242,12 @@ int ld_valid_fields(LDP ld)  {
 			sm_error("Ray #%d: Invalid cluster value %d\n.", i, ld->cluster[i]);
 			return 0;
 		}
-		
+
 		if(!is_nan(ld->readings_sigma[i]) && ld->readings_sigma[i] < 0) {
 			sm_error("Ray #%d: has invalid readings_sigma %f \n", i, ld->readings_sigma[i]);
 			return 0;
 		}
-		
+
 	}
 	/* Checks that there is at least 10% valid rays */
 	int num_valid   = count_equal(ld->valid, ld->nrays, 1);

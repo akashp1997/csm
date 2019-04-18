@@ -30,10 +30,10 @@ int xterm_color_available = 0;
 void check_for_xterm_color() {
 	if(checked_for_xterm_color) return;
 	checked_for_xterm_color = 1;
-	
+
 	const char * term = getenv("TERM");
 	if(!term) term = "unavailable";
-	xterm_color_available = !strcmp(term, "xterm-color") || !strcmp(term, "xterm") 
+	xterm_color_available = !strcmp(term, "xterm-color") || !strcmp(term, "xterm")
 		|| !strcmp(term, "rxvt");
 /*	sm_info("Terminal type: '%s', colors: %d\n", term, xterm_color_available); */
 }
@@ -51,19 +51,19 @@ void sm_error(const char *msg, ...)
 	check_for_xterm_color();
 	if(xterm_color_available)
 		fprintf(stderr, XTERM_ERROR);
-		
-	if(sm_program_name) 
+
+	if(sm_program_name)
 		fprintf(stderr, "%s: ", sm_program_name);
-	
+
 	sm_write_context();
-	
-	if(!xterm_color_available) 
+
+	if(!xterm_color_available)
 		fputs(":err: ", stderr);
 
 	va_list ap;
 	va_start(ap, msg);
 	vfprintf(stderr, msg, ap);
-	
+
 	if(xterm_color_available)
 		fprintf(stderr, XTERM_COLOR_RESET);
 }
@@ -71,15 +71,15 @@ void sm_error(const char *msg, ...)
 void sm_info(const char *msg, ...)
 {
 	check_for_xterm_color();
-	
-	if(sm_program_name) 
+
+	if(sm_program_name)
 		fprintf(stderr, "%s: ", sm_program_name);
-	
+
 	sm_write_context();
-	
-	if(!xterm_color_available) 
+
+	if(!xterm_color_available)
 		fputs(":inf: ", stderr);
-	
+
 	va_list ap;
 	va_start(ap, msg);
 	vfprintf(stderr, msg, ap);
@@ -88,25 +88,25 @@ void sm_info(const char *msg, ...)
 void sm_debug(const char *msg, ...)
 {
 	if(!sm_debug_write_flag) return;
-	
+
 	check_for_xterm_color();
-	
+
 	if(xterm_color_available)
 		fprintf(stderr, XTERM_DEBUG);
-	
-	if(sm_program_name) 
+
+	if(sm_program_name)
 		fprintf(stderr, "%s: ", sm_program_name);
 
 	sm_write_context();
 
-	if(!xterm_color_available) 
+	if(!xterm_color_available)
 		fputs(":dbg: ", stderr);
-	
+
 	va_list ap;
 	va_start(ap, msg);
 	vfprintf(stderr, msg, ap);
-	
-	
+
+
 	if(xterm_color_available)
 		fprintf(stderr, XTERM_COLOR_RESET);
 }
@@ -135,6 +135,5 @@ void sm_log_pop() {
 void sm_write_context() {
 	for(int i=0;i<sm_log_context;i++)
 		fprintf(stderr, "   ");
-	
-}
 
+}
